@@ -44,19 +44,23 @@ body {
 }
 
 @layer utilities {
+  /* Flat "instrument panel" surface — no blur, no translucency games.
+     Replaces the earlier glassmorphism treatment site-wide, since every
+     component already references this class. */
   .glass-panel {
-    @apply bg-void-panel/60 backdrop-blur-xl border border-white/[0.06];
+    @apply bg-void-panel/95 border border-white/[0.08];
   }
 
+  /* A restrained status-light glow, not a neon halo. Used sparingly on
+     small indicators (live dots, active nodes) rather than whole panels. */
   .glow-signal {
-    box-shadow: 0 0 40px -10px rgba(94, 234, 212, 0.35);
+    box-shadow: 0 0 10px -2px rgba(94, 234, 212, 0.3);
   }
 
+  /* Single restrained accent instead of a multi-stop rainbow gradient —
+     used once, on the hero headline, not as a recurring decorative motif. */
   .text-gradient-earth {
-    background: linear-gradient(90deg, #5eead4 0%, #3e7cb1 50%, #4caf7d 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    color: #5eead4;
   }
 
   .focus-ring {
@@ -65,5 +69,274 @@ body {
 
   .noise-overlay {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  }
+
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Thin top hairline, used on instrument-style panels in place of blur
+     to suggest depth without glassmorphism. */
+  .panel-hairline {
+    position: relative;
+  }
+  .panel-hairline::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(94, 234, 212, 0.25), transparent);
+  }
+}
+
+.orbital-hero {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: clamp(720px, 100svh, 1040px);
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 73% 45%, #162824 0, #0b1415 29%, transparent 65%),
+    #080e10;
+  color: #f4f5ef;
+}
+
+.orbital-hero::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background-image: radial-gradient(circle, #a3c8b939 1px, transparent 1.4px);
+  background-size: 58px 58px;
+  mask-image: linear-gradient(90deg, transparent 6%, #000 60%, #000 100%);
+  content: "";
+}
+
+.orbital-frame {
+  position: absolute;
+  z-index: -1;
+  top: 49%;
+  right: clamp(0px, 5vw, 110px);
+  width: min(62vw, 850px);
+  aspect-ratio: 1;
+  transform: translateY(-50%);
+}
+
+.orbital-planet {
+  position: absolute;
+  inset: 13%;
+  overflow: hidden;
+  border-radius: 50%;
+  box-shadow: 0 0 80px #63cfa52b;
+}
+
+.orbital-planet img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.orbital-planet::after {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 15px #9adfee60;
+  background: linear-gradient(125deg, #08121800 35%, #0a171e40 65%, #081214da 100%);
+  content: "";
+}
+
+.orbital-arc {
+  position: absolute;
+  border: 1px solid #a1d6bc42;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.orbital-arc-outer { inset: 5%; }
+.orbital-arc-inner { inset: 9.25%; border-style: dashed; opacity: .65; }
+
+.orbital-marker {
+  position: absolute;
+  inset: 5%;
+  animation: orbital-marker-travel 42s linear infinite;
+  pointer-events: none;
+}
+
+.orbital-marker span {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #b3edcc;
+  box-shadow: 0 0 20px #b3edcc;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes orbital-marker-travel {
+  from { transform: rotate(49deg); }
+  to { transform: rotate(409deg); }
+}
+
+.orbital-content { padding-top: 90px; padding-bottom: 86px; }
+
+.orbital-kicker {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  font-family: var(--font-mono);
+  font-size: .68rem;
+  letter-spacing: .15em;
+  color: #b2edcb;
+}
+
+.orbital-kicker span {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 50%;
+  background: #b2edcb;
+}
+
+.orbital-content h1 {
+  margin-top: 1.4rem;
+  font-family: var(--font-display);
+  font-size: clamp(4.6rem, 10.1vw, 10.4rem);
+  font-weight: 700;
+  letter-spacing: -.09em;
+  line-height: .88;
+}
+
+.orbital-content h1 span { color: #b2edcb; }
+
+.orbital-intro {
+  max-width: 27rem;
+  margin-top: 1.65rem;
+  color: #c7d1cc;
+  font-size: clamp(1rem, 1.7vw, 1.25rem);
+  line-height: 1.55;
+}
+
+.orbital-actions { display: flex; flex-wrap: wrap; gap: .7rem; margin-top: 1.8rem; }
+
+.orbital-button {
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  gap: .85rem;
+  border: 1px solid transparent;
+  border-radius: .45rem;
+  padding: .6rem 1rem;
+  font-size: .875rem;
+  font-weight: 700;
+  transition: background-color .2s, border-color .2s;
+}
+
+.orbital-button-primary { background: #b2edcb; color: #091712; }
+.orbital-button-primary:hover { background: #d5ffe8; }
+.orbital-button-secondary { border-color: #8aa59c60; background: #101a1c; color: #eff5ef; }
+.orbital-button-secondary:hover { border-color: #b2edcb; }
+
+.orbital-caption {
+  position: absolute;
+  right: 0;
+  bottom: 1.75rem;
+  left: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: .5rem 1rem;
+  color: #a6b8af;
+  font-family: var(--font-mono);
+  font-size: .65rem;
+}
+
+.orbital-caption a { display: inline-flex; align-items: center; gap: .4rem; margin-right: 6rem; }
+.orbital-caption a:hover { text-decoration: underline; }
+.portfolio-home { background: #0a1113; color: #f4f5ef; }
+#selected-work { scroll-margin-top: 55px; }
+.portfolio-section-heading { font-family: var(--font-display); font-weight: 650; font-size: clamp(2.5rem, 6vw, 5rem); line-height: 1; letter-spacing: -.065em; }
+
+.portfolio-switch { display: inline-flex; gap: .2rem; padding: .2rem; border: 1px solid #40504d; border-radius: .5rem; }
+.portfolio-switch button { border-radius: .3rem; padding: .5rem .8rem; font-size: .8rem; text-transform: capitalize; color: #c2d0ca; }
+.portfolio-switch button[aria-pressed="true"] { background: #c4edda; color: #101915; }
+
+.portfolio-card { display: flex; position: relative; isolation: isolate; min-height: 245px; align-items: flex-end; overflow: hidden; border: 1px solid #30403c; border-radius: .8rem; background: #101b1e; transition: border-color .2s; }
+.portfolio-card:hover { border-color: #a4dfbd; }
+.portfolio-card-0, .portfolio-card-1 { min-height: 395px; }
+.portfolio-card-image { z-index: -2; object-fit: cover; object-position: center 32%; }
+.portfolio-card-0::after { position: absolute; z-index: -1; inset: 0; background: linear-gradient(0deg, #0a1512 10%, #0a1512f4 36%, #0a151238 78%); content: ""; }
+.portfolio-card-content { position: relative; width: 100%; padding: clamp(1.15rem, 3vw, 2rem); }
+.portfolio-card-link { display: inline-flex; align-items: center; gap: .55rem; font-size: .8rem; font-weight: 700; color: #b5efcd; }
+.portfolio-card:hover .portfolio-card-link { text-decoration: underline; }
+
+.portfolio-card-code {
+  position: absolute;
+  top: 1.3rem;
+  right: clamp(1.15rem, 3vw, 2rem);
+  left: clamp(1.15rem, 3vw, 2rem);
+  display: grid;
+  gap: .35rem;
+  border: 1px solid #354541;
+  border-radius: .5rem;
+  padding: .8rem;
+  background: #090f11;
+  color: #a7b9af;
+  font-family: var(--font-mono);
+  font-size: clamp(.61rem, 1.3vw, .75rem);
+  white-space: nowrap;
+}
+
+.portfolio-card-code .removed { color: #ffa9a2; }
+.portfolio-card-code .added { color: #b2edcb; }
+
+.portfolio-text-link { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 1.25rem; border-top: 1px solid #40504d; color: #b5efcd; }
+.portfolio-text-link:hover { background: #152222; }
+.portfolio-text-link strong, .portfolio-text-link small { display: block; }
+.portfolio-text-link strong { font-family: var(--font-display); color: #f4f5ef; }
+.portfolio-text-link small { margin-top: .4rem; line-height: 1.5; color: #aabcb3; }
+.portfolio-text-link svg { flex: none; }
+
+@media (max-width: 767px) {
+  .orbital-hero { min-height: 770px; justify-content: flex-end; }
+  .orbital-frame { top: 94px; right: 50%; width: min(97vw, 475px); transform: translateX(50%); }
+  .orbital-content { padding-top: 365px; padding-bottom: 92px; }
+  .orbital-content h1 { font-size: clamp(4.1rem, 13.9vw, 6rem); }
+  .orbital-intro { max-width: 24rem; }
+  .portfolio-card-0, .portfolio-card-1 { min-height: 385px; }
+}
+
+@media (max-width: 390px) {
+  .orbital-frame { top: 76px; }
+  .orbital-content { padding-top: 340px; }
+}
+.canopy-sweep {
+  top: var(--scan-line);
+  box-shadow: 0 0 18px 4px #8df2bd8a;
+  animation: canopy-sweep 800ms ease-out both;
+}
+
+@keyframes canopy-sweep {
+  from { top: 0; opacity: 0; }
+  30% { opacity: 1; }
+  80% { opacity: 1; }
+  to { top: var(--scan-line); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .route-entrance { animation: route-entrance 240ms ease-out both; }
+  @keyframes route-entrance {
+    from { opacity: .65; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 }

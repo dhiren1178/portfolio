@@ -98,7 +98,7 @@ export default function AboutTimeline() {
       {/* Animated fill that draws in as the section scrolls through view */}
       <motion.div
         style={{ scaleY: lineHeight }}
-        className="absolute left-6 md:left-1/2 md:-translate-x-1/2 top-0 bottom-0 w-px origin-top bg-gradient-to-b from-signal via-canopy-light to-ocean-light"
+        className="absolute left-6 md:left-1/2 md:-translate-x-1/2 top-0 bottom-0 w-px origin-top bg-signal"
         aria-hidden="true"
       />
 

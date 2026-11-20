@@ -1,16 +1,8 @@
-# Dependencies
-node_modules/
-
-# Next.js
-.next/
-out/
-
-# Production
-dist/
-
-# Environment
-.env
-.env.local
-
-# macOS
+node_modules
+.next
+tsconfig.tsbuildinfo
 .DS_Store
+
+out/
+.sites-runtime/
+public/models/asl/runtime/

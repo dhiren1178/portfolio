@@ -3,6 +3,10 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { vegetationRegions, type VegetationRegion } from "@/lib/vegetationData";
+import ScanBeam from "@/components/scan/ScanBeam";
+import ScanRipple from "@/components/scan/ScanRipple";
+import HeatmapOverlay from "@/components/scan/HeatmapOverlay";
+import type { ScanPhase } from "@/components/scan/useScanSequence";
 import { cn } from "@/lib/utils";
 
 /**
@@ -17,6 +21,7 @@ import { cn } from "@/lib/utils";
 
 interface VegetationMapProps {
   selectedId: string | null;
+  phase: ScanPhase;
   onSelect: (region: VegetationRegion) => void;
 }
 
@@ -30,7 +35,7 @@ const terrainPatches = [
   { cx: 85, cy: 20, r: 10, fill: "#12314D" },
 ];
 
-export default function VegetationMap({ selectedId, onSelect }: VegetationMapProps) {
+export default function VegetationMap({ selectedId, phase, onSelect }: VegetationMapProps) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   return (
@@ -68,10 +73,24 @@ export default function VegetationMap({ selectedId, onSelect }: VegetationMapPro
           ))}
         </g>
 
+        {/* Heatmap for the scanned region, once a result exists */}
+        {vegetationRegions.map((region) => (
+          <HeatmapOverlay
+            key={`heatmap-${region.id}`}
+            id={region.id}
+            cx={region.x}
+            cy={region.y}
+            radius={region.radius}
+            intensity={region.stats.density / 100}
+            visible={phase === "result" && selectedId === region.id}
+          />
+        ))}
+
         {/* Region hotspots */}
         {vegetationRegions.map((region) => {
-          const isActive = selectedId === region.id;
+          const isTarget = selectedId === region.id;
           const isHovered = hoveredId === region.id;
+          const isScanning = isTarget && phase === "scanning";
           return (
             <g
               key={region.id}
@@ -81,41 +100,49 @@ export default function VegetationMap({ selectedId, onSelect }: VegetationMapPro
               className="cursor-pointer"
               tabIndex={0}
               role="button"
-              aria-pressed={isActive}
-              aria-label={`View vegetation stats for ${region.name}`}
+              aria-pressed={isTarget}
+              aria-label={`Run vegetation height scan on ${region.name}`}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") onSelect(region);
               }}
             >
-              {/* Scan sweep clip on hover */}
-              {isHovered && (
-                <clipPath id={`clip-${region.id}`}>
-                  <circle cx={region.x} cy={region.y} r={region.radius} />
-                </clipPath>
-              )}
-              {isHovered && (
-                <rect
-                  x={region.x - region.radius}
-                  y={region.y - region.radius}
-                  width={region.radius * 2}
-                  height={region.radius * 2}
-                  clipPath={`url(#clip-${region.id})`}
-                  fill="url(#scanGradient)"
-                  className="animate-scan"
-                />
-              )}
+              {/* Ground-highlight ripple, keyed so it replays every scan */}
+              <ScanRipple
+                key={`ripple-${region.id}-${isScanning}`}
+                cx={region.x}
+                cy={region.y}
+                maxRadius={region.radius * 2.2}
+                active={isScanning}
+              />
+
+              {/* Decorative sweep on hover, before any scan has run */}
+              <ScanBeam
+                id={`hover-${region.id}`}
+                cx={region.x}
+                cy={region.y}
+                radius={region.radius}
+                active={isHovered && phase === "idle"}
+              />
+              {/* Beam sweep for the actual in-progress scan */}
+              <ScanBeam
+                id={`active-${region.id}`}
+                cx={region.x}
+                cy={region.y}
+                radius={region.radius}
+                active={isScanning}
+              />
 
               <circle
                 cx={region.x}
                 cy={region.y}
                 r={region.radius}
-                fill={isActive ? "#4CAF7D" : "#2E7D5B"}
-                fillOpacity={isActive ? 0.35 : 0.2}
-                stroke={isActive || isHovered ? "#5EEAD4" : "#4CAF7D"}
-                strokeWidth={isActive ? 0.5 : 0.25}
+                fill={isTarget ? "#4CAF7D" : "#2E7D5B"}
+                fillOpacity={isTarget ? 0.35 : 0.2}
+                stroke={isTarget || isHovered ? "#5EEAD4" : "#4CAF7D"}
+                strokeWidth={isTarget ? 0.5 : 0.25}
               />
               <circle cx={region.x} cy={region.y} r={0.8} fill="#5EEAD4">
-                {!isActive && (
+                {!isTarget && (
                   <animate
                     attributeName="opacity"
                     values="1;0.3;1"
@@ -127,14 +154,6 @@ export default function VegetationMap({ selectedId, onSelect }: VegetationMapPro
             </g>
           );
         })}
-
-        <defs>
-          <linearGradient id="scanGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#5EEAD4" stopOpacity="0" />
-            <stop offset="50%" stopColor="#5EEAD4" stopOpacity="0.55" />
-            <stop offset="100%" stopColor="#5EEAD4" stopOpacity="0" />
-          </linearGradient>
-        </defs>
       </svg>
 
       {/* Hover label */}

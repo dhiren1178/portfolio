@@ -75,10 +75,10 @@ export interface PipelineStage {
 }
 
 export const pipelineStages: PipelineStage[] = [
-  { id: "input", label: "Satellite Image", detail: "Sentinel-2 / Cartosat tile" },
-  { id: "preprocess", label: "Preprocessing", detail: "Atmospheric correction, tiling" },
-  { id: "features", label: "Feature Extraction", detail: "Multi-band spectral features" },
-  { id: "vit", label: "Vision Transformer", detail: "DINOv2-based encoder" },
-  { id: "height", label: "Height Estimation", detail: "Regression head, per-pixel" },
-  { id: "output", label: "Final Output", detail: "Height map + confidence" },
+  { id: "input", label: "Satellite imagery", detail: "Sub-metre resolution" },
+  { id: "preprocess", label: "Preprocessing", detail: "Normalize, resample and tile" },
+  { id: "features", label: "Feature extraction", detail: "DINOv2 encoder" },
+  { id: "vit", label: "Height estimation", detail: "Dense Prediction Transformer" },
+  { id: "height", label: "Calibration", detail: "CNN ensemble and percentile adjustment" },
+  { id: "output", label: "Validation", detail: "Airborne LiDAR reference" },
 ];

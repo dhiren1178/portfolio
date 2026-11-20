@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { FiActivity } from "react-icons/fi";
 import type { VegetationRegion } from "@/lib/vegetationData";
+import type { ScanPhase } from "@/components/scan/useScanSequence";
+import ProcessingIndicator from "@/components/scan/ProcessingIndicator";
 import AnimatedNumber from "@/components/projects/AnimatedNumber";
 
 interface StatsPanelProps {
+  phase: ScanPhase;
   region: VegetationRegion | null;
 }
 
@@ -34,48 +36,7 @@ function Legend() {
   );
 }
 
-function ProcessingState() {
-  return (
-    <div className="flex flex-col items-center justify-center py-12 text-center">
-      <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ repeat: Infinity, duration: 1.4, ease: "linear" }}
-        className="mb-4 flex h-10 w-10 items-center justify-center rounded-full border-2 border-signal/25 border-t-signal"
-      />
-      <p className="font-mono text-xs text-signal tracking-wide">
-        RUNNING INFERENCE…
-      </p>
-      <div className="mt-4 w-full max-w-[220px] space-y-1.5" aria-hidden="true">
-        {[0, 1, 2].map((i) => (
-          <motion.div
-            key={i}
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: 1 }}
-            transition={{ duration: 0.5, delay: i * 0.15, ease: "easeOut" }}
-            style={{ transformOrigin: "left" }}
-            className="h-1 rounded-full bg-void-line overflow-hidden"
-          >
-            <div className="h-full w-full bg-signal/60" />
-          </motion.div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-export default function StatsPanel({ region }: StatsPanelProps) {
-  const [phase, setPhase] = useState<"idle" | "processing" | "result">("idle");
-
-  useEffect(() => {
-    if (!region) {
-      setPhase("idle");
-      return;
-    }
-    setPhase("processing");
-    const t = setTimeout(() => setPhase("result"), 1100);
-    return () => clearTimeout(t);
-  }, [region]);
-
+export default function StatsPanel({ phase, region }: StatsPanelProps) {
   return (
     <div className="glass-panel relative flex min-h-[420px] flex-col rounded-2xl p-6 md:p-7 overflow-hidden">
       {/* Ambient floating particles */}
@@ -118,7 +79,7 @@ export default function StatsPanel({ region }: StatsPanelProps) {
           </motion.div>
         )}
 
-        {phase === "processing" && (
+        {(phase === "scanning" || phase === "processing") && region && (
           <motion.div
             key="processing"
             initial={{ opacity: 0 }}
@@ -126,7 +87,9 @@ export default function StatsPanel({ region }: StatsPanelProps) {
             exit={{ opacity: 0 }}
             className="relative flex-1"
           >
-            <ProcessingState />
+            <ProcessingIndicator
+              label={phase === "scanning" ? "SCANNING REGION…" : "RUNNING INFERENCE…"}
+            />
           </motion.div>
         )}
 
